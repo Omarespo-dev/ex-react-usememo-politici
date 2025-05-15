@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState,useMemo } from 'react'
 import './App.css'
 
 function App() {
@@ -45,17 +45,31 @@ function App() {
   console.log(dataApi)
 
 
+  //Use State per input
+  const [searchInput, SetSearchInput] = useState("")
 
+  //filtriamo per nome e biografia
+  const filtredArr = useMemo(() => {
+    return dataApi.filter(p => {
+      return (p.name + p.biography).toLowerCase().includes(searchInput.toLowerCase())
+    })
+  },[dataApi,searchInput])
 
 
   return (
     <>
       <header>
         <h1>CARD POLITICI</h1>
+        <input
+          type="text"
+          placeholder='Cerca per Nome o Biografia'
+          value={searchInput}
+          onChange={e => SetSearchInput(e.target.value) }
+        />
       </header>
       <main>
         <div className='container-flex'>
-          {dataApi.map(politic => {
+          {filtredArr.map(politic => {
             return <section className='flex-card'>
               <img src={!politic.image ? "/img/Photo-Image-Icon-Graphics-10388619-1-1-580x386.jpg" : politic.image} />
 
