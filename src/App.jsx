@@ -1,5 +1,5 @@
 
-import { useEffect, useState,useMemo } from 'react'
+import { useEffect, useState, useMemo, memo } from 'react'
 import './App.css'
 
 function App() {
@@ -46,14 +46,36 @@ function App() {
 
 
   //Use State per input
-  const [searchInput, SetSearchInput] = useState("")
+    const [searchInput, SetSearchInput] = useState("")
 
-  //filtriamo per nome e biografia
-  const filtredArr = useMemo(() => {
-    return dataApi.filter(p => {
-      return (p.name + p.biography).toLowerCase().includes(searchInput.toLowerCase())
-    })
-  },[dataApi,searchInput])
+    //filtriamo per nome e biografia mi cambia solo quelle delle dipendeze cioe non rienderizza tutto senza useMemo
+    const filtredArr = useMemo(() => {
+      return dataApi.filter(p => {
+        return (p.name + p.biography).toLowerCase().includes(searchInput.toLowerCase())
+      })
+    }, [dataApi, searchInput])
+
+
+
+  // 📌 Milestone 3: Ottimizzare il rendering delle card con React.memo per la renderizzazione delle card senza infatti reinderizza tutti i componenti
+  const PoliticiansCard = memo(({ politician }) => {
+    // console.log(`render: ${politician.name}`);
+  
+    return (
+      <section className='flex-card'>
+        <img src={!politician.image ? "/img/No-Image-Placeholder.svg.png" : politician.image}  onError={e => e.currentTarget.src = "/img/No-Image-Placeholder.svg.png"}/>
+
+
+        <div>
+          <p>Name: {politician.name}</p>
+          <p>Position: {politician.position}</p>
+          <p>Biography: {politician.biography}</p>
+        </div>
+
+
+      </section>
+    )
+  })
 
 
   return (
@@ -63,28 +85,18 @@ function App() {
         <input
           type="text"
           placeholder='Cerca per Nome o Biografia'
+          //value fa sì che l’input segua sempre quello che c’è scritto nello stato di React.
           value={searchInput}
-          onChange={e => SetSearchInput(e.target.value) }
+
+          //onChange serve a dire a React di aggiornare lo stato ogni volta che tu scrivi qualcosa.
+          onChange={e => SetSearchInput(e.target.value)}
         />
       </header>
       <main>
         <div className='container-flex'>
-          {filtredArr.map(politic => {
-            return <section className='flex-card'>
-              <img src={!politic.image ? "/img/Photo-Image-Icon-Graphics-10388619-1-1-580x386.jpg" : politic.image} />
-
-
-              <div>
-                <p>Name: {politic.name}</p>
-                <p>Position: {politic.position}</p>
-                <p>Biography: {politic.biography}</p>
-              </div>
-
-
-            </section>
-          })}
-
-
+          {filtredArr.map(politic => (
+            <PoliticiansCard key={politic.id} politician={politic} />
+          ))}
 
 
         </div>
@@ -95,12 +107,3 @@ function App() {
 
 export default App
 
-
-
-
-
-
-
-
-
-// Obiettivo: Caricare e mostrare i politici in un’interfaccia chiara e leggibile.
